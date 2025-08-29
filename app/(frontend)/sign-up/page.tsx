@@ -82,7 +82,7 @@
     };
 
     const handleSignIn = () => {
-        router.push('/auth/sign-in/sign-in'); // Redirect to your Clerk Sign In page
+        router.push('/sign-in'); // Redirect to your Clerk Sign In page
     };
 
     const renderView = () => {

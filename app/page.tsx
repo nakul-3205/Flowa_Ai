@@ -47,10 +47,10 @@ const LandingPage = () => {
           <h1 className="text-xl font-bold">Flowa AI</h1>
         </div>
         <div className="flex items-center space-x-4">
-          <a href="/auth/sign-in/sign-in" className="hidden sm:inline-block p-2 text-foreground font-medium hover:text-primary transition-colors">
+          <a href="/sign-in" className="hidden sm:inline-block p-2 text-foreground font-medium hover:text-primary transition-colors">
             Sign In
           </a>
-          <a href="/auth/sign-up/sign-up" className="p-2 px-4 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/80 transition-colors">
+          <a href="/sign-up" className="p-2 px-4 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/80 transition-colors">
             Get Started
           </a>
           <button
@@ -72,10 +72,10 @@ const LandingPage = () => {
             Flowa AI is a sophisticated AI-powered platform for content creators and teams. Get the best of multiple AI models, grounded in real-time web data.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 animate-fade-in delay-400">
-            <a href="/auth/sign-up/sign-up" className="p-4 px-8 rounded-lg bg-primary text-primary-foreground font-bold text-lg hover:bg-primary/80 transition-colors shadow-lg">
+            <a href="/sign-up" className="p-4 px-8 rounded-lg bg-primary text-primary-foreground font-bold text-lg hover:bg-primary/80 transition-colors shadow-lg">
               Start for Free
             </a>
-            <a href="/auth/sign-in/sign-in" className="p-4 px-8 rounded-lg border border-border text-foreground font-bold text-lg hover:bg-muted/30 transition-colors shadow-lg">
+            <a href="/sign-in" className="p-4 px-8 rounded-lg border border-border text-foreground font-bold text-lg hover:bg-muted/30 transition-colors shadow-lg">
               Sign In
             </a>
           </div>
@@ -135,7 +135,7 @@ const LandingPage = () => {
               Join a community of forward-thinkers. Unleash your potential and create content that stands out.
             </p>
             <div className="mt-8 flex justify-center">
-              <a href="/auth/sign-up/sign-up" className="p-4 px-12 rounded-lg bg-primary text-primary-foreground font-bold text-lg hover:bg-primary/80 transition-colors shadow-lg">
+              <a href="/sign-up" className="p-4 px-12 rounded-lg bg-primary text-primary-foreground font-bold text-lg hover:bg-primary/80 transition-colors shadow-lg">
                 Sign Up Now
               </a>
             </div>

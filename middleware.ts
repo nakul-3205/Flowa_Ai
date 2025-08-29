@@ -8,8 +8,6 @@
     "/sign-in(.*)",
     "/sign-up(.*)",
     "/forgot-password",
-    '/auth/sign-up/sign-up(.*)',
-    '/auth/sign-in/sign-in(.*)',
     'not-found(.*)'
 
     ]);
@@ -25,7 +23,7 @@
 
     // ---- Clerk Auth Guard ----
     if (!userId && !isPublicRoute(req)) {
-        const url = new URL("/auth/sign-up/sign-up", req.url);
+        const url = new URL("/sign-up", req.url);
         return NextResponse.redirect(url);
     }
     if (userId && isPublicRoute(req)) {
