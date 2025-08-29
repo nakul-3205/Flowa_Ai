@@ -67,7 +67,7 @@
 
         if (result.status === 'complete') {
             await setActive({ session: result.createdSessionId });
-            router.push('/feed'); // Redirect to your main application feed
+            router.push('/chat'); // Redirect to your main application feed
         } else {
             console.error(JSON.stringify(result, null, 2));
             setMessage('Invalid verification code. Please try again.');

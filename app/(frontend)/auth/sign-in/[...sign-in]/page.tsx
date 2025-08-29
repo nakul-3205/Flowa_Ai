@@ -39,7 +39,7 @@ const SignInPage = () => {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        router.push('/feed'); // Redirect to the main application feed
+        router.push('/chat'); // Redirect to the main application feed
       } else {
         // This case generally won't be reached for successful sign-ins,
         // but it's good practice for other potential statuses.
