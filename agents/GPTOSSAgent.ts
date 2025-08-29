@@ -1,37 +1,55 @@
     // backend/agents/GPTOSSAgent.ts
-    import { IAgent } from "./IAgent";
-    import { gptOSSPrompt } from "../prompts/gptOSSPrompts";
+    import { gptOSSPrompt } from "@/prompts/gptOSSPrompts";
 
-    export class GPTOSSAgent implements IAgent {
-    private apiKey: string;
+    const GPT_OSS_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+    const API_KEY = process.env.GPT_API_KEY || "";
 
-    constructor(apiKey: string) {
-        this.apiKey = apiKey;
-    }
-
-    async generate(userInput: string, context?: string): Promise<string> {
-        // Build the model prompt
+    export async function GPTOSSAgent(
+    userInput: string,
+    context: string = ""
+    ): Promise<string> {
+    try {
+        // Build the model prompt with context
         const prompt = gptOSSPrompt(userInput, context);
 
-        // Call GPT-OSS 20B via OpenRouter
-        const response = await fetch(
-        "https://api.openrouter.ai/v1/openai/gpt-oss-20b/completions",
-        {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${this.apiKey}`,
+
+        const payload = {
+        model: "openai/gpt-oss-120b", 
+        messages: [
+            {
+            role: "user",
+            content: prompt,
             },
-            body: JSON.stringify({
-            input: prompt,
-            max_tokens: 1024,
-            temperature: 0.7,
-            }),
+        ],
+        max_tokens: 1024,
+        temperature: 0.7,
+        };
+
+        const response = await fetch(GPT_OSS_API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${API_KEY}`,
+          
+        },
+        body: JSON.stringify(payload),
+        });
+// console.log(response)
+        if (!response.ok) {
+        const text = await response.text(); // log raw response for debugging
+        console.error("GPT-OSS API error response:", text);
+        throw new Error(`GPT-OSS API error: ${response.statusText}`);
         }
-        );
 
         const data = await response.json();
 
-        return data.output_text || data.choices?.[0]?.text || "No response from GPT-OSS";
+        // Extract message content
+        const messageContent =
+        data.choices?.[0]?.message?.content || "No response from GPT-OSS";
+
+        return messageContent;
+    } catch (err) {
+        console.error("GPTOSSAgent error:", err);
+        return "Error: Failed to get response from GPT-OSS.";
     }
     }
