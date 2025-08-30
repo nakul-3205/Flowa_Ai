@@ -3,18 +3,19 @@ import { pipeline, env } from "@xenova/transformers";
 
 // ✅ Force Transformers.js to use WASM (so it works on Vercel serverless)
 (env as any).wasm = {
-    proxy: true,
-    numThreads: 1,
-  };
+  proxy: true,
+  numThreads: 1,
+};
+(env as any).allowLocalModels = false; // prevent native/onnxruntime fallback
 
 // Lazy-load embeddings model (all-MiniLM-L6-v2)
 let embedder: any;
 
 async function getEmbedder() {
   if (!embedder) {
-    // ⬅️ NOTE: device should be "cpu", not "wasm"
+    // ⬅️ FIX: use "wasm" (not "cpu") to avoid onnxruntime native errors
     embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", {
-      device: "cpu",
+      device: "wasm",
     });
   }
   return embedder;
