@@ -14,7 +14,7 @@
 
 
         const payload = {
-        model: "openai/gpt-oss-120b", 
+        model: "openai/gpt-oss-120b:free", 
         messages: [
             {
             role: "user",

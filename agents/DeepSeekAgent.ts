@@ -14,7 +14,7 @@ export async function deepSeekAgent(
 
     // Prepare payload according to OpenRouter chat-completion format
     const payload = {
-      model: "deepseek/deepseek-chat-v3.1",
+      model: "deepseek/deepseek-chat-v3.1:free",
       messages: [
         {
           role: "user",

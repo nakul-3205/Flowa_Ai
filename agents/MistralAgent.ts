@@ -17,7 +17,7 @@
             Authorization: `Bearer ${API_KEY}`,
         },
         body: JSON.stringify({
-            model: "mistralai/mistral-7b-instruct",
+            model: "mistralai/mistral-7b-instruct:free",
             messages: [
             { role: "system", content: "You are a helpful assistant." },
             { role: "user", content: prompt },
