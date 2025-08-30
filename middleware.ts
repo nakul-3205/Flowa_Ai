@@ -30,10 +30,7 @@
         const url = new URL("/chat", req.url);
         return NextResponse.redirect(url);
     }
-    if(!req.url){
-        const url = new URL("/notfound", req.url);
-        return NextResponse.redirect(url);
-    }
+    
     // ---- Rate Limiter ----
     const ip = req.headers.get("x-forwarded-for") || "unknown";
     const now = Date.now();

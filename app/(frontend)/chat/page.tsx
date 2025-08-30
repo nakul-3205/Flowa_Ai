@@ -10,6 +10,9 @@ const suggestedPrompts = [
   "Generate creative writing prompts"
 ];
 
+// Generate a robust unique ID for messages
+const generateUniqueId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
 // This is the single, main component for the entire application.
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -97,16 +100,17 @@ export default function App() {
   };
 
   const handleSend = async () => {
+    console.log("handleSend called with input:", input);  // Debug log
     if (!input.trim() || isTyping) return;
 
     const userMessage = {
-      id: Date.now().toString(),
+      id: generateUniqueId(),
       content: input,
       sender: "user",
       timestamp: new Date(),
     };
 
-    // Update messages in the current session
+    // Update messages in the current session (append user message)
     setChatSessions(prevSessions =>
       prevSessions.map(session =>
         session.id === currentSessionId
@@ -114,12 +118,14 @@ export default function App() {
           : session
       )
     );
+    console.log("User message added. Current session messages count:", chatSessions.find(s => s.id === currentSessionId)?.messages.length + 1); // +1 because state is async
 
     const currentInput = input;
     setInput("");
     setIsTyping(true);
 
     try {
+      console.log("Sending API request with query:", currentInput); // Debug log
       const response = await fetch('/api/query', {
         method: 'POST',
         headers: {
@@ -143,7 +149,7 @@ export default function App() {
         }
 
         const errorMessage = {
-          id: (Date.now() + 1).toString(),
+          id: generateUniqueId(),
           content: errorMessageText,
           sender: "ai",
           timestamp: new Date(),
@@ -165,7 +171,7 @@ export default function App() {
 
       if (!finalContent || finalContent.length === 0) {
         const errorMessage = {
-          id: (Date.now() + 1).toString(),
+          id: generateUniqueId(),
           content: "Sorry, the AI models are currently unable to generate a response. Please try again in a moment.",
           sender: "ai",
           timestamp: new Date(),
@@ -182,7 +188,7 @@ export default function App() {
       }
       
       const aiMessage = {
-        id: (Date.now() + 1).toString(),
+        id: generateUniqueId(),
         content: finalContent,
         sender: "ai",
         timestamp: new Date(),
@@ -195,12 +201,13 @@ export default function App() {
             : session
         )
       );
+      console.log("AI message added. Current session messages count:", chatSessions.find(s => s.id === currentSessionId)?.messages.length + 1); // +1 async note
       
     } catch (error) {
       console.error('Error calling API:', error);
       
       const errorMessage = {
-        id: (Date.now() + 1).toString(),
+        id: generateUniqueId(),
         content: "Sorry, I'm having trouble connecting to the server. Please check your network and try again.",
         sender: "ai",
         timestamp: new Date(),
@@ -274,6 +281,7 @@ export default function App() {
       
       if (listItems.length > 0) {
         elements.push(<ul key="final-list" className="my-2 ml-4 list-disc space-y-1">{listItems}</ul>);
+        listItems = [];
       }
       if (processedText.trim()) {
         elements.push(<p key={index} className="mb-2 text-sm" dangerouslySetInnerHTML={{ __html: processedText }} />);
@@ -287,48 +295,51 @@ export default function App() {
     return <>{elements}</>;
   };
 
-  const MessageBubble = ({ message }) => (
-    <div
-      className={`flex ${
-        message.sender === "user" ? "justify-end" : "justify-start"
-      }`}
-    >
-      <div className={`flex max-w-[80%] space-x-3 ${message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
-        <div className={`flex-shrink-0 p-2 rounded-lg ${
-            message.sender === "user" 
-              ? "bg-primary text-primary-foreground" 
-              : "bg-secondary text-secondary-foreground"
-          }`}
-        >
-          {message.sender === "user" ? (
-            <User className="h-4 w-4" />
-          ) : (
-            <Bot className="h-4 w-4" />
-          )}
-        </div>
-        <div className={`p-4 rounded-2xl shadow-md ${
-            message.sender === "user"
-              ? "bg-primary text-primary-foreground dark:bg-blue-600 dark:text-white"
-              : "bg-card border border-border"
-          }`}
-        >
-          {message.sender === "user" ? (
-            <p className="text-sm">{message.content}</p>
-          ) : (
-            renderMarkdown(message.content)
-          )}
-          <p className={`text-xs mt-2 ${
+  const MessageBubble = ({ message }) => {
+    console.log("Rendering message with id:", message.id); // Debug rendering
+    return (
+      <div
+        className={`flex ${
+          message.sender === "user" ? "justify-end" : "justify-start"
+        }`}
+      >
+        <div className={`flex max-w-[80%] space-x-3 ${message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
+          <div className={`flex-shrink-0 p-2 rounded-lg ${
               message.sender === "user" 
-                ? "text-primary-foreground/70 dark:text-gray-200" 
-                : "text-muted-foreground"
-            }`}
+                ? "bg-primary text-primary-foreground" 
+                : "bg-secondary text-secondary-foreground"
+              }`}
           >
-            {new Date(message.timestamp).toLocaleTimeString()}
-          </p>
+            {message.sender === "user" ? (
+              <User className="h-4 w-4" />
+            ) : (
+              <Bot className="h-4 w-4" />
+            )}
+          </div>
+          <div className={`p-4 rounded-2xl shadow-md ${
+              message.sender === "user"
+                ? "bg-primary text-primary-foreground dark:bg-blue-600 dark:text-white"
+                : "bg-card border border-border"
+              }`}
+          >
+            {message.sender === "user" ? (
+              <p className="text-sm">{message.content}</p>
+            ) : (
+              renderMarkdown(message.content)
+            )}
+            <p className={`text-xs mt-2 ${
+                message.sender === "user" 
+                  ? "text-primary-foreground/70 dark:text-gray-200" 
+                  : "text-muted-foreground"
+              }`}
+            >
+              {new Date(message.timestamp).toLocaleTimeString()}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="flex h-screen overflow-hidden font-sans bg-background">
@@ -361,7 +372,7 @@ export default function App() {
                   onClick={() => handleLoadSession(session.id)}
                   className={`w-full justify-start text-left p-2 rounded-lg flex items-center space-x-2 transition-colors duration-200 
                     ${session.id === currentSessionId ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}
-                  `}
+                    `}
                 >
                   <MessageSquare className="h-4 w-4" />
                   <span className="truncate">{session.messages.length > 0 ? session.messages[0].content : "New Chat"}</span>

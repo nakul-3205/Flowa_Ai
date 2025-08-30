@@ -9,8 +9,7 @@ export async function aggregateResponse(
   context: string = ""
 ): Promise<{
   finalAnswer: string;
-  chosenModel: string;
-  candidates: AgentResponse[];
+
 }> {
   let enrichedQuery = userQuery;
 
@@ -18,7 +17,7 @@ export async function aggregateResponse(
     // Lazy import utilities
     const { shouldSearch } = await import("@/utils/shouldSearch");
     const { webSearch } = await import("./webSearch");
-    const { findMostRelevantOutput } = await import("@/utils/semanticsSimilarity");
+    const { findMostRelevantOutput } = await import("@/utils/similarity")
 
     // Lazy import agents
     const { deepSeekAgent } = await import("@/agents/DeepSeekAgent");
@@ -65,16 +64,14 @@ ${JSON.stringify(searchResults, null, 2)}
     const bestOutput = await findMostRelevantOutput(userQuery, allOutputs);
 
     return {
-      finalAnswer: bestOutput.output,
-      chosenModel: bestOutput.model,
-      candidates: allOutputs,
+      finalAnswer: bestOutput.finalAnswer.toString(),
+      
     };
   } catch (err) {
     console.error("Aggregator error:", err);
     return {
       finalAnswer: "Sorry, something went wrong while processing your query.",
-      chosenModel: "None",
-      candidates: [],
+      
     };
   }
 }

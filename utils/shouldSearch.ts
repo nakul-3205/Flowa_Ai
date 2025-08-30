@@ -36,7 +36,7 @@ Query: "{user_query}"
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-r1-0528:free", // DeepSeek R1 0528 free model
+        model: "deepseek/deepseek-chat-v3.1", 
         messages: [
           {
             role: "user",
