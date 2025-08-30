@@ -1,19 +1,22 @@
 // backend/utils/semanticSimilarity.ts
-import { pipeline, env } from "@xenova/transformers";
 
-// ✅ Force Transformers.js to use WASM (so it works on Vercel serverless)
+// 1. Set WASM preference and prevent ONNX fallback BEFORE importing pipeline
+import { env } from "@xenova/transformers";
+
 (env as any).wasm = {
   proxy: true,
   numThreads: 1,
 };
-(env as any).allowLocalModels = false; // prevent native/onnxruntime fallback
+(env as any).allowLocalModels = false;
+
+// 2. Now import pipeline (after env is set)
+import { pipeline } from "@xenova/transformers";
 
 // Lazy-load embeddings model (all-MiniLM-L6-v2)
 let embedder: any;
-
 async function getEmbedder() {
   if (!embedder) {
-    // ⬅️ FIX: use "wasm" (not "cpu") to avoid onnxruntime native errors
+    // Use WASM device explicitly (make sure device:'wasm' is set)
     embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", {
       device: "wasm",
     });
@@ -49,14 +52,12 @@ export async function findMostRelevantOutput(
   llmOutputs: { model: string; output: string }[]
 ): Promise<{ model: string; output: string; scores: number[] }> {
   const embedder = await getEmbedder();
-
   // Get embedding for query
   const queryEmbeddingRaw = await embedder(userQuery, {
     pooling: "mean",
     normalize: true,
   });
   const queryEmbedding = flattenEmbedding(queryEmbeddingRaw);
-
   let scores: number[] = [];
   for (const item of llmOutputs) {
     try {
@@ -65,15 +66,14 @@ export async function findMostRelevantOutput(
         normalize: true,
       });
       const outputEmbedding = flattenEmbedding(outputEmbeddingRaw);
-
       const score = cosineSimilarity(queryEmbedding, outputEmbedding);
       scores.push(score);
+    //   console.log(score)
     } catch (err) {
       console.error(`Embedding failed for model ${item.model}:`, err);
       scores.push(-1); // mark failure
     }
   }
-
   const maxIndex = scores.indexOf(Math.max(...scores));
   return {
     model: llmOutputs[maxIndex]?.model || "unknown",
