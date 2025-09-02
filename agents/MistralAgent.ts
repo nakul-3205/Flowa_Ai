@@ -8,7 +8,7 @@
     context: string = ""
     ): Promise<string> {
     try {
-        const prompt = mistralPrompt(userInput, context);
+        const prompt = mistralPrompt();
 
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -19,8 +19,8 @@
         body: JSON.stringify({
             model: "mistralai/mistral-7b-instruct:free",
             messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: prompt },
+            { role: "system", content:prompt },
+            { role: "user", content: userInput,context },
             ],
             max_tokens: 1024,
             temperature: 0.7,

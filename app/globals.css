@@ -195,3 +195,27 @@
     @apply bg-background text-foreground;
   }
 }
+/* app/globals.css */
+
+/* This hides the default scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.hide-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hide-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+}
+
+/* This shows the scrollbar only on hover */
+.hide-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: #A0A0A0; /* a light gray for light mode */
+  border-radius: 9999px;
+}
+
+.dark .hide-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: #404040; /* a darker gray for dark mode */
+}

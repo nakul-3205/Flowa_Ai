@@ -10,16 +10,20 @@
     ): Promise<string> {
     try {
         // Build the model prompt with context
-        const prompt = gptOSSPrompt(userInput, context);
+        const prompt = gptOSSPrompt();
 
 
         const payload = {
-        model: "openai/gpt-oss-120b:free", 
+        model: "qwen/qwen3-235b-a22b:free", 
         messages: [
             {
-            role: "user",
+            role: "system",
             content: prompt,
             },
+            {
+                role:'user',
+                content:userInput,context
+            }
         ],
         max_tokens: 1024,
         temperature: 0.7,

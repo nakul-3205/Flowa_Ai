@@ -48,6 +48,8 @@
     ${allOutputs.map((o, i) => `Output ${i + 1} (from ${o.model}): ${o.output}`).join("\n\n")}
 
     Your task: Produce a **single, refined, professional response** synthesizing all the above information.
+    'Incase all models fail and even one model returns some output take that output tailor it and send the info'
+
     `;
 
         // Stream response from Gemini

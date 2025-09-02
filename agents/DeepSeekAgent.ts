@@ -10,16 +10,20 @@ export async function deepSeekAgent(
 ): Promise<string> {
   try {
     // Build the prompt with context
-    const prompt = deepSeekPrompt(userInput, context);
+    const prompt = deepSeekPrompt();
 
     // Prepare payload according to OpenRouter chat-completion format
     const payload = {
       model: "deepseek/deepseek-chat-v3.1:free",
       messages: [
         {
-          role: "user",
+          role: "system",
           content: prompt,
         },
+        {
+          role:'user',
+          content:userInput,context,
+        }
       ],
       max_tokens: 1024,
       temperature: 0.7,

@@ -13,9 +13,12 @@ export async function llamaAgent(userQuery: string, context: string) {
       messages: [
         {
           role: "system",
-          content: "You are a helpful AI assistant powered by LLaMA 3.1 405B.",
+          content: llamaPrompt(),
         },
-        { role: "user", content: llamaPrompt(userQuery, context) }, // pass both here
+        {
+          role: "user",
+          content: `${userQuery}\n\nContext: ${context}`,
+        },
       ],
       temperature: 0.6,
       max_tokens: 800,

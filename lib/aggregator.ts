@@ -59,6 +59,7 @@ ${JSON.stringify(searchResults, null, 2)}
     if (allOutputs.length === 0) {
       throw new Error("All agents failed to return a response.");
     }
+    console.log(allOutputs)
 
     // Step 4: Pick best output
     const bestOutput = await findMostRelevantOutput(userQuery, allOutputs);

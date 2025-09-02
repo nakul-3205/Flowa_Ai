@@ -14,7 +14,7 @@
     if (!TAVILY_API_KEY) {
         throw new Error("Missing Tavily API key. Set TAVILY_API_KEY in .env");
     }
-
+console.log('tavily hit')
     try {
         const response = await fetch(TAVILY_ENDPOINT, {
         method: "POST",
@@ -33,12 +33,14 @@
         }
 
         const data = await response.json();
+        console.log(data)
 
         // Simplify and return relevant info
         return data.results.map((r) => ({
         title: r.title,
         url: r.url,
         snippet: r.snippet,
+        ref:'WebSearch was used and here is the result of websearch'
         }));
     } catch (error) {
         console.error("Web search failed:", error);

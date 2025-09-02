@@ -1,4 +1,4 @@
-// app/api/query/route.ts
+// /api/query/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { aggregateResponse } from "@/lib/aggregator";
 
