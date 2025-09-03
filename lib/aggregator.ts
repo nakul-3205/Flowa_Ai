@@ -1,3 +1,8 @@
+import { isMaliciousPrompt } from "@/utils/promptModerator";
+import { logFlaggedPrompt } from "./logFlaggedPrompt";
+import { FLAG_WARNING_MESSAGE } from "./WarningMessage";
+
+
 // /backend/lib/aggregator.ts
 type AgentResponse = {
   model: string;
@@ -6,7 +11,8 @@ type AgentResponse = {
 
 export async function aggregateResponse(
   userQuery: string,
-  context: string = ""
+  context: string = "",
+  user?: { userId: string; firstName: string; lastName: string; email: string }
 ): Promise<{
   finalAnswer: string;
 
@@ -14,6 +20,21 @@ export async function aggregateResponse(
   let enrichedQuery = userQuery;
 
   try {
+    const isMalicious=isMaliciousPrompt(enrichedQuery)
+    if(isMalicious.isMalicious==true){
+      console.warn('malicious prompt detected',enrichedQuery)
+      if(user){
+      await logFlaggedPrompt({
+        userId: user?.userId,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        email: user?.email,
+        prompt: enrichedQuery
+      })}
+      const warning=FLAG_WARNING_MESSAGE
+      return {finalAnswer: warning}
+    }
+
     // Lazy import utilities
     const { shouldSearch } = await import("@/utils/shouldSearch");
     const { webSearch } = await import("./webSearch");

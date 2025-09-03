@@ -168,8 +168,9 @@ export default function ChatPage() {
     try {
       const response = await fetch(`/api/chat?chatId=${id}`);
       if (response.ok) {
-        const { messages } = await response.json();
-        setMessages(messages);
+        // Updated to ensure messages have a 'role' property
+        const { messages: fetchedMessages } = await response.json();
+        setMessages(fetchedMessages);
       } else {
         throw new Error('Failed to fetch conversation');
       }
@@ -246,19 +247,25 @@ export default function ChatPage() {
         setChatList(prev => [{ chatId: newChatId, title: content.substring(0, 20) + '...' }, ...prev]);
       }
 
-      const context = messages.slice(-5);
-      const queryPayload = {
-        query: userMessage.content,
-        context: [...context, userMessage]
-      };
+      // --- START: MODIFIED CODE FOR CONTEXT AWARENESS ---
+      // Get the last 5 messages, excluding the current one.
+      const previousMessages = messages.slice(-5);
+      
+      // Format the previous messages into a single string for the 'context' field.
+      // We use a specific format (e.g., "User: [message]\nAI: [message]") to help the AI understand the flow.
+      const contextString = previousMessages.map(msg => `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}`).join('\n\n');
 
       const queryResponse = await fetch('/api/query', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(queryPayload),
+        body: JSON.stringify({
+          query: userMessage.content,
+          context: contextString,
+        }),
       });
+      // --- END: MODIFIED CODE ---
 
       if (!queryResponse.ok) {
         let errorMessage = 'An unexpected error occurred. Please try again.';
@@ -339,48 +346,57 @@ export default function ChatPage() {
         }
       `}</style>
 
-      {!isSidebarOpen && (
-        <div className="absolute top-4 left-2 z-50">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => {
-              if (isLoading) toast.error("Please wait for the AI to finish its response.");
-              else setIsSidebarOpen(true);
-            }} 
-            disabled={isLoading}>
-            <PanelRight className="w-6 h-6" />
-          </Button>
-        </div>
-      )}
-
-      <aside className={`flex-shrink-0 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-16'} bg-white dark:bg-[#1a1a1a] border-r border-gray-200 dark:border-neutral-800 flex flex-col p-4 space-y-4`}>
+      {/* Responsive Sidebar */}
+      <aside 
+        className={`flex-shrink-0 transition-all duration-300 ease-in-out 
+                   ${isSidebarOpen ? 'w-full sm:w-64' : 'w-0 sm:w-16'} 
+                   ${isSidebarOpen ? 'relative' : 'absolute sm:relative'}
+                   bg-white dark:bg-[#1a1a1a] border-r border-gray-200 dark:border-neutral-800 
+                   flex flex-col p-4 space-y-4`}
+      >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <BrainCircuit className={`w-6 h-6 text-blue-500 transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'}`} />
-            <h2 className={`text-xl font-bold transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'}`}>Flowa AI</h2>
+          <div className={`flex items-center space-x-2 transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 hidden sm:flex'}`}>
+            <BrainCircuit className="w-6 h-6 text-blue-500" />
+            <h2 className="text-xl font-bold">Flowa AI</h2>
           </div>
-          {isSidebarOpen && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => {
-                      if (isLoading) toast.error("Please wait for the AI to finish its response.");
-                      else setIsSidebarOpen(false);
-                    }} 
-                    disabled={isLoading}>
-                    <PanelLeft className="w-5 h-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  Collapse Sidebar
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          {/* Hide collapse button on mobile when sidebar is open */}
+          <div className={`flex items-center ${isSidebarOpen ? 'w-full justify-between' : ''} sm:w-auto sm:justify-end`}>
+            {isSidebarOpen && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => {
+                        if (isLoading) toast.error("Please wait for the AI to finish its response.");
+                        else setIsSidebarOpen(false);
+                      }} 
+                      disabled={isLoading}
+                      className="hidden sm:flex"
+                    >
+                      <PanelLeft className="w-5 h-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    Collapse Sidebar
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => {
+                if (isLoading) toast.error("Please wait for the AI to finish its response.");
+                else setIsSidebarOpen(false);
+              }} 
+              disabled={isLoading}
+              className="sm:hidden"
+            >
+              <PanelLeft className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         <div className="flex justify-between items-center">
@@ -393,7 +409,7 @@ export default function ChatPage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button onClick={handleNewChat} variant="outline" size="icon" disabled={isLoading || isChatListLoading}>
+                  <Button onClick={handleNewChat} variant="outline" size="icon" disabled={isLoading || isChatListLoading} className="sm:hidden">
                     <MessageSquarePlus className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
@@ -405,7 +421,7 @@ export default function ChatPage() {
           )}
         </div>
 
-        <div className={`flex flex-col space-y-2 overflow-y-auto flex-1 custom-scrollbar`}>
+        <div className={`flex flex-col space-y-2 overflow-y-auto flex-1 custom-scrollbar ${!isSidebarOpen && 'sm:hidden'}`}>
           {isSidebarOpen && <h3 className="text-sm font-semibold text-gray-400 dark:text-neutral-500 mt-4 mb-2">Recent Chats</h3>}
           {isChatListLoading ? (
             <div className="flex items-center justify-center py-4">
@@ -420,7 +436,7 @@ export default function ChatPage() {
                       variant={chat.chatId === chatId ? 'secondary' : 'ghost'}
                       onClick={() => fetchChatConversation(chat.chatId)}
                       disabled={isLoading || isChatListLoading}
-                      className={`w-full justify-start overflow-hidden whitespace-nowrap ${isSidebarOpen ? 'py-2 px-3' : 'py-2 px-1'}`}
+                      className={`w-full justify-start overflow-hidden whitespace-nowrap text-left px-3 py-2`}
                     >
                       {isSidebarOpen ? (
                         <span className="truncate">{chat.title}</span>
@@ -440,7 +456,7 @@ export default function ChatPage() {
           )}
         </div>
 
-        <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-200 dark:border-neutral-800">
+        <div className={`mt-auto pt-4 flex items-center justify-between border-t border-gray-200 dark:border-neutral-800 ${!isSidebarOpen && 'sm:hidden'}`}>
           <div className="flex items-center space-x-2">
             {isSidebarOpen && <span className="text-sm font-medium">{user?.fullName || 'User'}</span>}
           </div>
@@ -460,7 +476,7 @@ export default function ChatPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full" disabled={isLoading || isChatListLoading} onClick={() => {
-                     if (isLoading) toast.error("Please wait for the AI to finish its response.");
+                   if (isLoading) toast.error("Please wait for the AI to finish its response.");
                 }}>
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.imageUrl} alt={user?.fullName || ''} />
@@ -484,11 +500,28 @@ export default function ChatPage() {
           </div>
         </div>
       </aside>
+      
+      {/* Sidebar Open Button on Mobile */}
+      {!isSidebarOpen && (
+        <div className="absolute top-4 left-2 z-50 sm:hidden">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => {
+              if (isLoading) toast.error("Please wait for the AI to finish its response.");
+              else setIsSidebarOpen(true);
+            }} 
+            disabled={isLoading}>
+            <PanelRight className="w-6 h-6" />
+          </Button>
+        </div>
+      )}
 
-      <div className="flex-1 flex flex-col bg-neutral-50 dark:bg-[#0a0a0a]">
+      {/* Main Chat Area */}
+      <div className={`flex-1 flex flex-col bg-neutral-50 dark:bg-[#0a0a0a] transition-all duration-300 ease-in-out ${isSidebarOpen ? 'hidden sm:flex' : 'flex'}`}>
         <div 
           ref={mainChatRef} 
-          className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 hide-scrollbar relative"
+          className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative"
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === 'End') {
@@ -498,10 +531,10 @@ export default function ChatPage() {
           }}
         >
           {messages.length === 0 && !isLoading && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <h1 className="text-5xl font-extrabold mb-2 drop-shadow-md bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 text-transparent bg-clip-text">FLOWA AI</h1>
-              <p className="text-lg text-gray-400 dark:text-neutral-600 mb-8">How can I help you today?</p>
-              <div className="grid grid-cols-2 gap-4 max-w-2xl w-full">
+            <div className="flex flex-col items-center justify-center h-full text-center p-4">
+              <h1 className="text-4xl sm:text-5xl font-extrabold mb-2 drop-shadow-md bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 text-transparent bg-clip-text">FLOWA AI</h1>
+              <p className="text-md sm:text-lg text-gray-400 dark:text-neutral-600 mb-8">How can I help you today?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl w-full">
                 {prompts.map((prompt, index) => (
                   <Button
                     key={index}
@@ -526,7 +559,7 @@ export default function ChatPage() {
                 </div>
               )}
               <div
-                className={`prose prose-sm dark:prose-invert max-w-[75%] rounded-2xl p-3 shadow-sm
+                className={`prose prose-sm dark:prose-invert max-w-[85%] sm:max-w-[75%] rounded-2xl p-3 shadow-sm
                   ${message.role === 'user'
                     ? 'bg-blue-500 text-white self-end rounded-br-none'
                     : 'bg-white dark:bg-neutral-950 dark:text-neutral-100 rounded-bl-none border dark:border-neutral-600 border-gray-200'
@@ -551,7 +584,7 @@ export default function ChatPage() {
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
                 <Bot className="w-5 h-5" />
               </div>
-              <div className="max-w-[75%] rounded-2xl rounded-bl-none p-3 shadow-sm bg-white dark:bg-neutral-950 animate-pulse border dark:border-neutral-600 border-gray-200">
+              <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-bl-none p-3 shadow-sm bg-white dark:bg-neutral-950 animate-pulse border dark:border-neutral-600 border-gray-200">
                 <p className="text-sm leading-relaxed dark:text-neutral-100">{loadingMessage}</p>
               </div>
             </div>
@@ -571,7 +604,7 @@ export default function ChatPage() {
         </div>
 
         <div className="flex-shrink-0 bg-white dark:bg-[#1a1a1a] border-t border-gray-200 dark:border-neutral-800 p-4 sm:p-6">
-          <form onSubmit={handleSend} className="flex space-x-2">
+          <form onSubmit={handleSend} className="flex space-x-2 items-end">
             <textarea
               className="flex-1 resize-none rounded-xl bg-gray-50 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 text-sm text-neutral-800 dark:text-neutral-200 px-4 py-3 placeholder-gray-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-hidden max-h-[150px]"
               value={input}

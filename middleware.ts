@@ -8,7 +8,8 @@
     "/sign-up(.*)",
     "/forgot-password",
     "/api/webhooks/user",
-    "not-found(.*)"
+    "not-found(.*)",
+    '/sso-callback'
     ]);
 
     
