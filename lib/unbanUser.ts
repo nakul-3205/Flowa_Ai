@@ -1,5 +1,5 @@
 // lib/unbanUser.ts
-import { prisma } from "@/lib/prisma";
+import { prisma } from "./prisma.js"
 
 export async function unbanExpiredUsers() {
 const now = new Date();

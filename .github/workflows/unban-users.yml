@@ -2,12 +2,13 @@ name: Unban Expired Users
 
 on:
   schedule:
-    - cron: "0 */1 * * *" # Runs every 1 hour
+    - cron: "0 */1 * * *" # Runs every hour
   workflow_dispatch: # Allow manual trigger
 
 jobs:
   unban:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -20,8 +21,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # Install ts-node to run TypeScript directly
+      - name: Install ts-node
+        run: npm install ts-node typescript
+
       - name: Run unban script
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          node -e "import('./lib/unbanUser.mjs').then(m => m.unbanExpiredUsers())"
+          npx ts-node lib/unbanUser.ts
