@@ -24,4 +24,4 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          node -e "import('./lib/unbanUser.js').then(m => m.unbanExpiredUsers())"
+          node -e "import('./lib/unbanUser.mjs').then(m => m.unbanExpiredUsers())"
