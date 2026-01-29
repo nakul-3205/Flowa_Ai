@@ -1,37 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Note:
+The application was built and tested successfully during development. Over time, framework updates introduced breaking changes, so the live deployment is not actively maintained. The focus of this repository is on backend architecture, AI orchestration logic, and system design choices.
 
-## Getting Started
+Flowa AI – Multi-LLM Orchestration Platform
+Project Overview
 
-First, run the development server:
+Flowa AI is a full-stack AI platform that orchestrates and aggregates responses from multiple large language models (LLMs). The system provides context-aware AI chat capabilities, handling multiple AI responses, moderation, and analytics. This project demonstrates backend architecture, AI orchestration, and database design for modern AI applications.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Orchestrates multiple LLMs for a single query
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Persistent chat storage for analytics and auditing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Rate limiting
 
-## Learn More
+Prompt safety and moderation rules
 
-To learn more about Next.js, take a look at the following resources:
+Real-time web search integration for context-aware responses
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Hybrid database design using PostgreSQL and MongoDB
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Tech Stack
 
-## Deploy on Vercel
+Frontend: Next.js, TypeScript, Tailwind CSS
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Backend: Node.js, Next.js API routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# Flowa_Ai
+Databases: PostgreSQL (Neon), MongoDB (for chat persistence)
+
+APIs / AI Integration: Tavily API, OpenRouter, Gemini, multiple LLMs
+
+Authentication:Clerk Auth
+
+Architecture
+
+Client sends query to backend via REST API
+
+Backend receives query, validates input, and distributes it to multiple LLMs in parallel
+
+Prompt moderation and safety checks are applied to all responses
+
+MongoDB stores chat history asynchronously, PostgreSQL stores structured metadata, analytics, and user info
+
+LLM outputs are aggregated, filtered, and ranked before returning the final response to the client
